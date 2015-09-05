@@ -1,0 +1,29 @@
+{
+  "name": "loose-envify",
+  "version": "0.0.1",
+  "description": "loose-envify",
+  "keywords": [],
+  "homepage": "https://github.com/zertosh/loose-envify",
+  "license": "MIT",
+  "author": "Andres Suarez <zertosh@gmail.com>",
+  "files": [
+    "README.md",
+    "default.js",
+    "loose-envify.js"
+  ],
+  "main": "loose-envify.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/zertosh/loose-envify.git"
+  },
+  "scripts": {
+    "test": "tap test/*.js"
+  },
+  "dependencies": {
+    "js-tokens": "^1.0.1"
+  },
+  "devDependencies": {
+    "browserify": "^11.0.1",
+    "tap": "^1.4.0"
+  }
+}
