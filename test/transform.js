@@ -13,11 +13,10 @@ test('transform', function(t) {
   });
 
   b.bundle(function(err, src) {
-    src = src.toString();
     t.notOk(err);
-    t.notMatch(src, /\bprocess\.env\.NODE_ENV\b/);
-    t.match(src, /"development"/);
+    t.notMatch(String(src), /\bprocess\.env\.NODE_ENV\b/);
+    t.match(String(src), /"development"/);
 
-    t.equal(src.match(/"development"/g).length, 2);
+    t.equal(String(src).match(/"development"/g).length, 2);
   });
 });

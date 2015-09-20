@@ -13,9 +13,8 @@ test('purge', function(t) {
   b.transform(LooseEnvify, {env: {}, purge: true});
 
   b.bundle(function(err, src) {
-    src = src.toString();
     t.notOk(err);
-    t.notMatch(src, /\bprocess\.env\.NODE_ENV\b/);
-    t.match(src, /module\.exports = undefined;/);
+    t.notMatch(String(src), /\bprocess\.env\.NODE_ENV\b/);
+    t.match(String(src), /module\.exports = undefined;/);
   });
 });
