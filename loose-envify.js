@@ -4,8 +4,10 @@ var jsTokens = require('js-tokens');
 var stream = require('stream');
 var util = require('util');
 
+var commentRe = /^\/[/*]/;
 var jsonExtRe = /\.json$/;
 var processEnvRe = /\bprocess\.env\.[_$a-zA-Z][$\w]+\b/;
+var whitespaceRe = /^\s+$/;
 
 module.exports = LooseEnvify;
 util.inherits(LooseEnvify, stream.Transform);
@@ -56,7 +58,13 @@ LooseEnvify.replace = function(src, opts) {
         parts[i + 1] === '.' &&
         parts[i + 2] === 'env' &&
         parts[i + 3] === '.') {
-      if (typeof env[parts[i + 4]] !== 'undefined') {
+      var prevCodeToken = getAdjacentCodeToken(-1, parts, i);
+      var nextCodeToken = getAdjacentCodeToken(1, parts, i + 4);
+      if (prevCodeToken === '.' || nextCodeToken === '.') {
+        // skip deep properties
+      } else if (nextCodeToken === '=') {
+        // skip assignments
+      } else if (typeof env[parts[i + 4]] !== 'undefined') {
         out += JSON.stringify(env[parts[i + 4]]);
         i += 4;
         continue;
@@ -71,3 +79,14 @@ LooseEnvify.replace = function(src, opts) {
 
   return out;
 };
+
+function getAdjacentCodeToken(dir, parts, i) {
+  while ((i += dir)) {
+    var part = parts[i];
+    if (whitespaceRe.test(part) || commentRe.test(part)) {
+      continue;
+    } else {
+      return part;
+    }
+  }
+}
