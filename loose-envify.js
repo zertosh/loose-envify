@@ -4,10 +4,9 @@ var jsTokens = require('js-tokens');
 var stream = require('stream');
 var util = require('util');
 
-var commentRe = /^\/[/*]/;
 var jsonExtRe = /\.json$/;
 var processEnvRe = /\bprocess\.env\.[_$a-zA-Z][$\w]+\b/;
-var whitespaceRe = /^\s+$/;
+var spaceOrCommentRe = /^(?:\s|\/[/*])/;
 
 module.exports = function(rootEnv) {
   rootEnv = rootEnv || process.env;
@@ -75,11 +74,9 @@ function replace(src, envs) {
 }
 
 function getAdjacentCodeToken(dir, parts, i) {
-  while ((i += dir)) {
-    var part = parts[i];
-    if (whitespaceRe.test(part) || commentRe.test(part)) {
-      continue;
-    } else {
+  while (true) {
+    var part = parts[i += dir];
+    if (!spaceOrCommentRe.test(part)) {
       return part;
     }
   }
