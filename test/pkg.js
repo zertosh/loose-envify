@@ -3,7 +3,7 @@
 var browserify = require('browserify');
 var test = require('tap').test;
 
-test('transform', function(t) {
+test('pkg', function(t) {
   t.plan(4);
 
   process.env.NODE_ENV = 'development';

@@ -25,7 +25,7 @@ envify:
 
 loose-envify:
 
-  $ for i in {1..5}; do node bench/bench.js '../loose-envify'; done
+  $ for i in {1..5}; do node bench/bench.js '../'; done
   51ms
   52ms
   52ms

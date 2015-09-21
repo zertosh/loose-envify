@@ -1,9 +1,9 @@
 'use strict';
 
 var browserify = require('browserify');
-var test = require('tap').test;
 var envify = require('envify');
-var LooseEnvify = require('../');
+var looseEnvify = require('../');
+var test = require('tap').test;
 
 test('envify', function(t) {
   t.plan(3);
@@ -13,7 +13,7 @@ test('envify', function(t) {
   browserify({
       entries: [__dirname + '/react/react-with-addons-with-node_env.js']
     })
-    .transform(LooseEnvify)
+    .transform(looseEnvify)
     .bundle(function(err, src) {
       t.notOk(err);
       if (res.push(src) === 2) done();

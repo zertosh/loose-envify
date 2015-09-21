@@ -9,17 +9,23 @@ var jsonExtRe = /\.json$/;
 var processEnvRe = /\bprocess\.env\.[_$a-zA-Z][$\w]+\b/;
 var whitespaceRe = /^\s+$/;
 
-module.exports = LooseEnvify;
-util.inherits(LooseEnvify, stream.Transform);
+module.exports = function(rootEnv) {
+  rootEnv = rootEnv || process.env;
+  return function (file, trOpts) {
+    if (jsonExtRe.test(file)) {
+      return stream.PassThrough();
+    }
+    var envs = trOpts ? [rootEnv, trOpts] : [rootEnv];
+    return new LooseEnvify(envs);
+  };
+};
 
-function LooseEnvify(file, opts) {
-  if (!(this instanceof LooseEnvify)) {
-    return new LooseEnvify.configure(opts)(file);
-  }
+function LooseEnvify(envs) {
   stream.Transform.call(this);
   this._data = '';
-  this._opts = opts;
+  this._envs = envs;
 }
+util.inherits(LooseEnvify, stream.Transform);
 
 LooseEnvify.prototype._transform = function(buf, enc, cb) {
   this._data += buf;
@@ -27,28 +33,20 @@ LooseEnvify.prototype._transform = function(buf, enc, cb) {
 };
 
 LooseEnvify.prototype._flush = function(cb) {
-  var replaced = LooseEnvify.replace(this._data, this._opts);
+  var replaced = replace(this._data, this._envs);
   this.push(replaced);
   cb();
 };
 
-LooseEnvify.configure = function(opts) {
-  return function (file) {
-    if (jsonExtRe.test(file)) {
-      return stream.PassThrough();
-    }
-    return new LooseEnvify(file, opts);
-  };
-};
-
-LooseEnvify.replace = function(src, opts) {
+function replace(src, envs) {
   if (!processEnvRe.test(src)) {
     return src;
   }
 
-  var purge = opts && opts.purge;
-  var env = opts && opts.env || process.env;
   var out = '';
+  var purge = envs.some(function(env) {
+    return env._ && env._.indexOf('purge') !== -1;
+  });
 
   jsTokens.lastIndex = 0
   var parts = src.match(jsTokens);
@@ -60,16 +58,12 @@ LooseEnvify.replace = function(src, opts) {
         parts[i + 3] === '.') {
       var prevCodeToken = getAdjacentCodeToken(-1, parts, i);
       var nextCodeToken = getAdjacentCodeToken(1, parts, i + 4);
-      if (prevCodeToken === '.' || nextCodeToken === '.') {
-        // skip deep properties
-      } else if (nextCodeToken === '=') {
-        // skip assignments
-      } else if (typeof env[parts[i + 4]] !== 'undefined') {
-        out += JSON.stringify(env[parts[i + 4]]);
-        i += 4;
-        continue;
-      } else if (purge) {
-        out += 'undefined';
+      var replacement = getReplacementString(envs, parts[i + 4], purge);
+      if (prevCodeToken !== '.' &&
+          nextCodeToken !== '.' &&
+          nextCodeToken !== '=' &&
+          typeof replacement === 'string') {
+        out += replacement;
         i += 4;
         continue;
       }
@@ -78,7 +72,7 @@ LooseEnvify.replace = function(src, opts) {
   }
 
   return out;
-};
+}
 
 function getAdjacentCodeToken(dir, parts, i) {
   while ((i += dir)) {
@@ -88,5 +82,17 @@ function getAdjacentCodeToken(dir, parts, i) {
     } else {
       return part;
     }
+  }
+}
+
+function getReplacementString(envs, name, purge) {
+  for (var j = 0; j < envs.length; j++) {
+    var env = envs[j];
+    if (typeof env[name] !== 'undefined') {
+      return JSON.stringify(env[name]);
+    }
+  }
+  if (purge) {
+    return 'undefined';
   }
 }
