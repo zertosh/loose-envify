@@ -6,7 +6,7 @@ var str = '';
 
 fs.createReadStream('test/react/react-with-addons-with-node_env.js')
   .pipe(transform())
-  .on('data', function(buf) { str += str; })
+  .on('data', function(buf) { str += buf; })
   .on('end', function() {
     console.log('%sms', Date.now() - start);
   });
