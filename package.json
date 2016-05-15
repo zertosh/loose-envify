@@ -14,6 +14,9 @@
   "homepage": "https://github.com/zertosh/loose-envify",
   "license": "MIT",
   "author": "Andres Suarez <zertosh@gmail.com>",
+  "bin": {
+    "loose-envify": "cli.js"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/zertosh/loose-envify.git"
