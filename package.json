@@ -29,8 +29,8 @@
     "js-tokens": "^1.0.1"
   },
   "devDependencies": {
-    "browserify": "^11.0.1",
+    "browserify": "^13.1.1",
     "envify": "^3.4.0",
-    "tap": "^1.4.0"
+    "tap": "^8.0.0"
   }
 }
