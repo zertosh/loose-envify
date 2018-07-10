@@ -26,7 +26,7 @@
     "test": "tap test/*.js"
   },
   "dependencies": {
-    "js-tokens": "^3.0.0"
+    "js-tokens": "^3.0.0 || ^4.0.0"
   },
   "devDependencies": {
     "browserify": "^13.1.1",
