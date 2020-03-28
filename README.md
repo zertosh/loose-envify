@@ -2,16 +2,11 @@
 
 [![Build Status](https://travis-ci.org/zertosh/loose-envify.svg?branch=master)](https://travis-ci.org/zertosh/loose-envify)
 
-Fast (and loose) selective `process.env` replacer using [js-tokens](https://github.com/lydell/js-tokens) instead of an AST. Works just like [envify](https://github.com/hughsk/envify) but much faster.
+Selective `process.env` replacer using [js-tokens](https://github.com/lydell/js-tokens) instead of an AST. Works just like [envify](https://github.com/hughsk/envify) but a tiny bit faster.
 
 ## Gotchas
 
-* Doesn't handle broken syntax.
-* Doesn't look inside embedded expressions in template strings.
-  - **this won't work:**
-  ```js
-  console.log(`the current env is ${process.env.NODE_ENV}`);
-  ```
+* Doesn't report broken syntax.
 * Doesn't replace oddly-spaced or oddly-commented expressions.
   - **this won't work:**
   ```js
@@ -28,18 +23,18 @@ loose-envify has the exact same interface as [envify](https://github.com/hughsk/
 envify:
 
   $ for i in {1..5}; do node bench/bench.js 'envify'; done
-  708ms
-  727ms
-  791ms
-  719ms
-  720ms
+  113ms
+  125ms
+  112ms
+  115ms
+  114ms
 
 loose-envify:
 
   $ for i in {1..5}; do node bench/bench.js '../'; done
-  51ms
-  52ms
-  52ms
-  52ms
-  52ms
+  85ms
+  90ms
+  83ms
+  84ms
+  81ms
 ```

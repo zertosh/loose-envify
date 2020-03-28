@@ -1,9 +1,15 @@
 'use strict';
 
-var jsTokens = require('js-tokens').default;
+var jsTokens = require('js-tokens');
 
 var processEnvRe = /\bprocess\.env\.[_$a-zA-Z][$\w]+\b/;
-var spaceOrCommentRe = /^(?:\s|\/[/*])/;
+
+var spaceOrComment = new Set([
+  "MultiLineComment",
+  "SingleLineComment",
+  "LineTerminatorSequence",
+  "WhiteSpace",
+]);
 
 function replace(src, envs) {
   if (!processEnvRe.test(src)) {
@@ -15,17 +21,17 @@ function replace(src, envs) {
     return env._ && env._.indexOf('purge') !== -1;
   });
 
-  jsTokens.lastIndex = 0
-  var parts = src.match(jsTokens);
+  var parts = Array.from(jsTokens(src));
 
   for (var i = 0; i < parts.length; i++) {
-    if (parts[i    ] === 'process' &&
-        parts[i + 1] === '.' &&
-        parts[i + 2] === 'env' &&
-        parts[i + 3] === '.') {
+    if (i + 4 < parts.length &&
+        parts[i    ].value === 'process' &&
+        parts[i + 1].value === '.' &&
+        parts[i + 2].value === 'env' &&
+        parts[i + 3].value === '.') {
       var prevCodeToken = getAdjacentCodeToken(-1, parts, i);
       var nextCodeToken = getAdjacentCodeToken(1, parts, i + 4);
-      var replacement = getReplacementString(envs, parts[i + 4], purge);
+      var replacement = getReplacementString(envs, parts[i + 4].value, purge);
       if (prevCodeToken !== '.' &&
           nextCodeToken !== '.' &&
           nextCodeToken !== '=' &&
@@ -35,7 +41,7 @@ function replace(src, envs) {
         continue;
       }
     }
-    out.push(parts[i]);
+    out.push(parts[i].value);
   }
 
   return out.join('');
@@ -44,8 +50,11 @@ function replace(src, envs) {
 function getAdjacentCodeToken(dir, parts, i) {
   while (true) {
     var part = parts[i += dir];
-    if (!spaceOrCommentRe.test(part)) {
-      return part;
+    if (part === undefined) {
+      return undefined;
+    }
+    if (!spaceOrComment.has(part.type)) {
+      return part.value;
     }
   }
 }
